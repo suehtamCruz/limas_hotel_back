@@ -53,6 +53,7 @@ public class ReservationsController(IReservationService reservationService, IIma
         await reservationService.DeleteAsync(id) ? NoContent() : NotFound();
 
     [HttpPost("{id}/dog-picture")]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<ReservationResponse>> UploadDogPicture(string id, IFormFile file)
     {
         if (await reservationService.GetByIdAsync(id) is null) return NotFound();
@@ -66,6 +67,7 @@ public class ReservationsController(IReservationService reservationService, IIma
     }
 
     [HttpPost("{id}/vaccine-card-picture")]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<ReservationResponse>> UploadVaccineCardPicture(string id, IFormFile file)
     {
         if (await reservationService.GetByIdAsync(id) is null) return NotFound();
