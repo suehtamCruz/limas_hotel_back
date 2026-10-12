@@ -5,18 +5,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LimasHotel.Api.Controllers;
 
-[Authorize]
+
 [ApiController]
 [Route("api/[controller]")]
 public class ReservationsController(IReservationService reservationService, IImageUploadService imageUploadService) : ControllerBase
 {
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReservationResponse>>> GetAll()
     {
         var reservations = await reservationService.GetAllAsync();
         return Ok(reservations.Select(ReservationResponse.From));
     }
-
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<ReservationResponse>> GetById(string id)
     {
@@ -33,7 +34,7 @@ public class ReservationsController(IReservationService reservationService, IIma
         var reservation = await reservationService.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = reservation.Id }, ReservationResponse.From(reservation));
     }
-
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<ReservationResponse>> Update(string id, UpdateReservationRequest request)
     {
@@ -47,7 +48,7 @@ public class ReservationsController(IReservationService reservationService, IIma
             return BadRequest(new { message = ex.Message });
         }
     }
-
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id) =>
         await reservationService.DeleteAsync(id) ? NoContent() : NotFound();
