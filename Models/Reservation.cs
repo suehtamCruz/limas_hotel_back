@@ -33,6 +33,15 @@ public class Reservation
     [BsonElement("dog_picture")]
     public string? DogPicture { get; set; }
 
+    [BsonElement("vaccine_card_picture")]
+    public string? VaccineCardPicture { get; set; }
+
+    [BsonElement("airConditioner")]
+    public bool AirConditioner { get; set; }
+
+    [BsonElement("price")]
+    public decimal Price { get; set; }
+
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

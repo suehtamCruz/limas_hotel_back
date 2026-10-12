@@ -8,6 +8,9 @@ namespace LimasHotel.Api.Services;
 
 public class ReservationService(MongoContext context) : IReservationService
 {
+    private const decimal AirConditionerDailyRate = 100m;
+    private const decimal StandardDailyRate = 70m;
+
     private readonly IMongoCollection<Reservation> _reservations = context.Reservations;
 
     public Task<List<Reservation>> GetAllAsync() =>
@@ -28,8 +31,10 @@ public class ReservationService(MongoContext context) : IReservationService
             EndDate = request.EndDate,
             DogBreed = request.DogBreed.Trim(),
             DogAge = request.DogAge,
-            Phone = request.Phone.Trim()
+            Phone = request.Phone.Trim(),
+            AirConditioner = request.AirConditioner
         };
+        reservation.Price = CalculatePrice(reservation.StartDate, reservation.EndDate, reservation.AirConditioner);
 
         await _reservations.InsertOneAsync(reservation);
         return reservation;
@@ -47,6 +52,12 @@ public class ReservationService(MongoContext context) : IReservationService
         if (request.DogBreed is not null) reservation.DogBreed = request.DogBreed.Trim();
         if (request.DogAge is not null) reservation.DogAge = request.DogAge.Value;
         if (request.Phone is not null) reservation.Phone = request.Phone.Trim();
+        if (request.AirConditioner is not null) reservation.AirConditioner = request.AirConditioner.Value;
+
+        if (reservation.EndDate < reservation.StartDate)
+            throw new ArgumentException("'end_date' não pode ser anterior a 'start_date'.");
+
+        reservation.Price = CalculatePrice(reservation.StartDate, reservation.EndDate, reservation.AirConditioner);
         reservation.UpdatedAt = DateTime.UtcNow;
 
         await _reservations.ReplaceOneAsync(r => r.Id == id, reservation);
@@ -70,5 +81,24 @@ public class ReservationService(MongoContext context) : IReservationService
 
         await _reservations.ReplaceOneAsync(r => r.Id == id, reservation);
         return reservation;
+    }
+
+    public async Task<Reservation?> SetVaccineCardPictureAsync(string id, string pictureUrl)
+    {
+        var reservation = await GetByIdAsync(id);
+        if (reservation is null) return null;
+
+        reservation.VaccineCardPicture = pictureUrl;
+        reservation.UpdatedAt = DateTime.UtcNow;
+
+        await _reservations.ReplaceOneAsync(r => r.Id == id, reservation);
+        return reservation;
+    }
+
+    private static decimal CalculatePrice(DateTime startDate, DateTime endDate, bool airConditioner)
+    {
+        var dailyRate = airConditioner ? AirConditionerDailyRate : StandardDailyRate;
+        var dailyStays = (endDate.Date - startDate.Date).Days + 1;
+        return dailyStays * dailyRate;
     }
 }

@@ -11,4 +11,5 @@ public interface IReservationService
     Task<Reservation?> UpdateAsync(string id, UpdateReservationRequest request);
     Task<bool> DeleteAsync(string id);
     Task<Reservation?> SetDogPictureAsync(string id, string pictureUrl);
+    Task<Reservation?> SetVaccineCardPictureAsync(string id, string pictureUrl);
 }

@@ -37,11 +37,15 @@ public class ReservationsController(IReservationService reservationService, IIma
     [HttpPut("{id}")]
     public async Task<ActionResult<ReservationResponse>> Update(string id, UpdateReservationRequest request)
     {
-        if (request.StartDate is not null && request.EndDate is not null && request.EndDate < request.StartDate)
-            return BadRequest(new { message = "'end_date' não pode ser anterior a 'start_date'." });
-
-        var reservation = await reservationService.UpdateAsync(id, request);
-        return reservation is null ? NotFound() : Ok(ReservationResponse.From(reservation));
+        try
+        {
+            var reservation = await reservationService.UpdateAsync(id, request);
+            return reservation is null ? NotFound() : Ok(ReservationResponse.From(reservation));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
@@ -58,6 +62,19 @@ public class ReservationsController(IReservationService reservationService, IIma
         var url = await imageUploadService.UploadAsync(stream, file.FileName);
 
         var reservation = await reservationService.SetDogPictureAsync(id, url);
+        return reservation is null ? NotFound() : Ok(ReservationResponse.From(reservation));
+    }
+
+    [HttpPost("{id}/vaccine-card-picture")]
+    public async Task<ActionResult<ReservationResponse>> UploadVaccineCardPicture(string id, IFormFile file)
+    {
+        if (await reservationService.GetByIdAsync(id) is null) return NotFound();
+        if (file.Length == 0) return BadRequest(new { message = "Arquivo de imagem não informado." });
+
+        await using var stream = file.OpenReadStream();
+        var url = await imageUploadService.UploadAsync(stream, file.FileName);
+
+        var reservation = await reservationService.SetVaccineCardPictureAsync(id, url);
         return reservation is null ? NotFound() : Ok(ReservationResponse.From(reservation));
     }
 }
