@@ -1,0 +1,46 @@
+@LimasHotel.Api_HostAddress = http://localhost:5275
+@token = COLE_O_TOKEN_AQUI
+
+### Criar usuário
+POST {{LimasHotel.Api_HostAddress}}/api/users
+Content-Type: application/json
+
+{
+  "email": "admin@limas.com",
+  "password": "senha123",
+  "name": "Admin"
+}
+
+### Listar usuários
+GET {{LimasHotel.Api_HostAddress}}/api/users
+
+### Buscar por id
+GET {{LimasHotel.Api_HostAddress}}/api/users/{id}
+
+### Atualizar usuário
+PUT {{LimasHotel.Api_HostAddress}}/api/users/{id}
+Content-Type: application/json
+
+{
+  "name": "Novo Nome"
+}
+
+### Remover usuário
+DELETE {{LimasHotel.Api_HostAddress}}/api/users/{id}
+
+### Login
+POST {{LimasHotel.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@limas.com",
+  "password": "senha123"
+}
+
+### Usuário logado
+GET {{LimasHotel.Api_HostAddress}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Logout (revoga o token)
+POST {{LimasHotel.Api_HostAddress}}/api/auth/logout
+Authorization: Bearer {{token}}
