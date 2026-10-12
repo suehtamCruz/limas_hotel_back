@@ -9,6 +9,7 @@ public class MongoContext
 {
     public IMongoCollection<User> Users { get; }
     public IMongoCollection<RevokedToken> RevokedTokens { get; }
+    public IMongoCollection<Reservation> Reservations { get; }
 
     public MongoContext(IOptions<MongoSettings> options)
     {
@@ -17,6 +18,7 @@ public class MongoContext
 
         Users = database.GetCollection<User>(settings.UsersCollection);
         RevokedTokens = database.GetCollection<RevokedToken>(settings.RevokedTokensCollection);
+        Reservations = database.GetCollection<Reservation>(settings.ReservationsCollection);
 
         EnsureIndexes();
     }

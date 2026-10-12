@@ -8,4 +8,5 @@ public class MongoSettings
     public string DatabaseName { get; set; } = "limas_hotel";
     public string UsersCollection { get; set; } = "users";
     public string RevokedTokensCollection { get; set; } = "revoked_tokens";
+    public string ReservationsCollection { get; set; } = "reservations";
 }
