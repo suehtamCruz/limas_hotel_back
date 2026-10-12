@@ -31,6 +31,7 @@ public record ReservationResponse(
     [property: JsonPropertyName("dog_breed")] string DogBreed,
     [property: JsonPropertyName("dog_age")] int DogAge,
     string Phone,
+    [property: JsonPropertyName("dog_picture")] string? DogPicture,
     DateTime CreatedAt,
     DateTime UpdatedAt)
 {
@@ -43,6 +44,7 @@ public record ReservationResponse(
         reservation.DogBreed,
         reservation.DogAge,
         reservation.Phone,
+        reservation.DogPicture,
         reservation.CreatedAt,
         reservation.UpdatedAt);
 }

@@ -59,4 +59,16 @@ public class ReservationService(MongoContext context) : IReservationService
         var result = await _reservations.DeleteOneAsync(r => r.Id == id);
         return result.DeletedCount > 0;
     }
+
+    public async Task<Reservation?> SetDogPictureAsync(string id, string pictureUrl)
+    {
+        var reservation = await GetByIdAsync(id);
+        if (reservation is null) return null;
+
+        reservation.DogPicture = pictureUrl;
+        reservation.UpdatedAt = DateTime.UtcNow;
+
+        await _reservations.ReplaceOneAsync(r => r.Id == id, reservation);
+        return reservation;
+    }
 }

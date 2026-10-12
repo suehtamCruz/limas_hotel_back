@@ -6,16 +6,30 @@ using LimasHotel.Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(MongoSettings.SectionName));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(CloudinarySettings.SectionName));
 
 builder.Services.AddSingleton<MongoContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IImageUploadService, CloudinaryImageUploadService>();
+
+var cloudinarySettings = builder.Configuration.GetSection(CloudinarySettings.SectionName).Get<CloudinarySettings>()
+                          ?? throw new InvalidOperationException("Seção 'Cloudinary' não configurada.");
+if (string.IsNullOrWhiteSpace(cloudinarySettings.CloudName) ||
+    string.IsNullOrWhiteSpace(cloudinarySettings.ApiKey) ||
+    string.IsNullOrWhiteSpace(cloudinarySettings.ApiSecret))
+    throw new InvalidOperationException("As credenciais do Cloudinary ('Cloudinary:CloudName', 'Cloudinary:ApiKey', 'Cloudinary:ApiSecret') devem ser configuradas.");
+
+var cloudinaryAccount = new Account(cloudinarySettings.CloudName, cloudinarySettings.ApiKey, cloudinarySettings.ApiSecret);
+builder.Services.AddSingleton(new Cloudinary(cloudinaryAccount));
 
 var jwt = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
           ?? throw new InvalidOperationException("Seção 'Jwt' não configurada.");

@@ -8,7 +8,7 @@ namespace LimasHotel.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class ReservationsController(IReservationService reservationService) : ControllerBase
+public class ReservationsController(IReservationService reservationService, IImageUploadService imageUploadService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReservationResponse>>> GetAll()
@@ -47,4 +47,17 @@ public class ReservationsController(IReservationService reservationService) : Co
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id) =>
         await reservationService.DeleteAsync(id) ? NoContent() : NotFound();
+
+    [HttpPost("{id}/dog-picture")]
+    public async Task<ActionResult<ReservationResponse>> UploadDogPicture(string id, IFormFile file)
+    {
+        if (await reservationService.GetByIdAsync(id) is null) return NotFound();
+        if (file.Length == 0) return BadRequest(new { message = "Arquivo de imagem não informado." });
+
+        await using var stream = file.OpenReadStream();
+        var url = await imageUploadService.UploadAsync(stream, file.FileName);
+
+        var reservation = await reservationService.SetDogPictureAsync(id, url);
+        return reservation is null ? NotFound() : Ok(ReservationResponse.From(reservation));
+    }
 }

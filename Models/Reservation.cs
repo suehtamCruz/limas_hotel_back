@@ -30,6 +30,9 @@ public class Reservation
     [BsonElement("phone")]
     public string Phone { get; set; } = string.Empty;
 
+    [BsonElement("dog_picture")]
+    public string? DogPicture { get; set; }
+
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
