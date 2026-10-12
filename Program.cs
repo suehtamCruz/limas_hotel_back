@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using LimasHotel.Api.Data;
+using LimasHotel.Api.Middleware;
 using LimasHotel.Api.Services;
 using LimasHotel.Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -101,7 +102,12 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
