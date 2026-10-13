@@ -12,9 +12,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHos
         logger.LogError(exception, "Erro não tratado no endpoint {Method} {Path}.",
             httpContext.Request.Method, httpContext.Request.Path);
 
-        var message = environment.IsDevelopment()
-            ? exception.Message
-            : "Ocorreu um erro interno no servidor. Tente novamente mais tarde.";
+        var message = exception.Message;
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         httpContext.Response.ContentType = "application/json";

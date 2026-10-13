@@ -104,10 +104,16 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddRequestTimeouts(options =>
+    options.DefaultPolicy = new Microsoft.AspNetCore.Http.Timeouts.RequestTimeoutPolicy
+    {
+        Timeout = TimeSpan.FromMinutes(1)
+    });
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseRequestTimeouts();
 
 if (app.Environment.IsDevelopment())
 {
