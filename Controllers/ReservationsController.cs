@@ -26,14 +26,29 @@ public class ReservationsController(IReservationService reservationService, IIma
     }
 
     [HttpPost]
-    public async Task<ActionResult<ReservationResponse>> Create(CreateReservationRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ReservationResponse>> Create([FromForm] CreateReservationRequest request)
     {
         if (request.EndDate < request.StartDate)
             return BadRequest(new { message = "'end_date' não pode ser anterior a 'start_date'." });
 
-        var reservation = await reservationService.CreateAsync(request);
+        if (request.DogPicture?.Length == 0)
+            return BadRequest(new { message = "Imagem 'dog_picture' não informada." });
+
+        if (request.VaccineCardPicture?.Length == 0)
+            return BadRequest(new { message = "Imagem 'vaccine_card_picture' não informada." });
+
+        await using var dogStream = request?.DogPicture.OpenReadStream();
+        await using var vaccineStream = request?.VaccineCardPicture.OpenReadStream();
+
+        var dogPictureTask = imageUploadService.UploadAsync(dogStream, request.DogPicture.FileName);
+        var vaccineTask = imageUploadService.UploadAsync(vaccineStream, request.VaccineCardPicture.FileName);
+        await Task.WhenAll(dogPictureTask, vaccineTask);
+
+        var reservation = await reservationService.CreateAsync(request, dogPictureTask.Result, vaccineTask.Result);
         return CreatedAtAction(nameof(GetById), new { id = reservation.Id }, ReservationResponse.From(reservation));
     }
+
     [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<ReservationResponse>> Update(string id, UpdateReservationRequest request)

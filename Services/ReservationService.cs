@@ -21,7 +21,36 @@ public class ReservationService(MongoContext context) : IReservationService
             ? await _reservations.Find(r => r.Id == id).FirstOrDefaultAsync()
             : null;
 
-    public async Task<Reservation> CreateAsync(CreateReservationRequest request)
+    public async Task<Reservation> CreateAsync(CreateReservationRequest request, string? dogPictureUrl, string? vaccineCardPictureUrl)
+    {
+        var reservation = new Reservation
+        {
+            Owner = request.Owner.Trim(),
+            DogName = request.DogName.Trim(),
+            StartDate = request.StartDate,
+            EndDate = request.EndDate,
+            DogBreed = request.DogBreed.Trim(),
+            DogAge = request.DogAge,
+            Phone = request.Phone.Trim(),
+            AirConditioner = request.AirConditioner
+        }; 
+        if (dogPictureUrl is not null)
+        {
+            reservation.DogPicture = dogPictureUrl;
+        }
+
+        if (vaccineCardPictureUrl is not null)
+        {
+            reservation.VaccineCardPicture = vaccineCardPictureUrl;
+        }
+
+        reservation.Price = CalculatePrice(reservation.StartDate, reservation.EndDate, reservation.AirConditioner);
+
+        await _reservations.InsertOneAsync(reservation);
+        return reservation;
+    }
+
+    public async Task<Reservation> CreateAsync(CreateReservationRequest request, string? dogPictureUrl)
     {
         var reservation = new Reservation
         {
@@ -34,6 +63,11 @@ public class ReservationService(MongoContext context) : IReservationService
             Phone = request.Phone.Trim(),
             AirConditioner = request.AirConditioner
         };
+        if (dogPictureUrl is not null)
+        {
+            reservation.DogPicture = dogPictureUrl;
+        }
+
         reservation.Price = CalculatePrice(reservation.StartDate, reservation.EndDate, reservation.AirConditioner);
 
         await _reservations.InsertOneAsync(reservation);

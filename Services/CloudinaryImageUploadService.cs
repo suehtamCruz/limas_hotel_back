@@ -10,7 +10,9 @@ public class CloudinaryImageUploadService(Cloudinary cloudinary) : IImageUploadS
         var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(fileName, fileStream),
-            Folder = "limas-hotel/dogs"
+            UseFilename = true,
+            UniqueFilename = true,
+            Overwrite = false
         };
 
         var result = await cloudinary.UploadAsync(uploadParams);
